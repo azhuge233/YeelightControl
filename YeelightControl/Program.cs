@@ -15,13 +15,13 @@ namespace YeelightControl {
 
 		static bool CheckValid(List<string> args) {
 			if (args.Count == 0) {
-				Output.InvalidInput("No arguement provided");
+				Output.InvalidInput("No argument provided");
 				Output.Usage();
 				return false;
 			}
 
 			if (args.Count > 2) {
-				Output.InvalidInput("Too many arguements");
+				Output.InvalidInput("Too many arguments");
 				Output.Usage();
 				return false;
 			}
