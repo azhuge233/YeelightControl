@@ -7,7 +7,7 @@ using YeelightAPI;
 namespace YeelightControl {
 	class Program {
 		#region variables
-		static readonly string path = @".\config.json";
+		static readonly string path = @$"{AppContext.BaseDirectory}config.json";
 		static readonly List<string> availCommands = new () {
 			"on", "off", "set"
 		};
@@ -88,12 +88,12 @@ namespace YeelightControl {
 				await devicesGroup.Connect();
 
 				if (args[0] == availCommands[0]) {
-					await devicesGroup.TurnOn();
+					await devicesGroup.TurnOn(smooth: 1000);
 				} else if (args[0] == availCommands[1]) {
-					await devicesGroup.TurnOff();
+					await devicesGroup.TurnOff(smooth: 1000);
 				} else if (args[0] == availCommands[2]) {
 					var bright = Convert.ToInt32(args[1]);
-					await devicesGroup.SetBrightness(value: bright);
+					await devicesGroup.SetBrightness(value: bright, smooth: 1000);
 				}
 			} catch (Exception ex) {
 				Output.Error(ex.Message);
@@ -102,7 +102,7 @@ namespace YeelightControl {
 		}
 
 		static async Task Main(string[] args) {
-			var argsl = args.ToList<string>();
+			var argsl = args.ToList();
 			await Run(argsl);
 		}
 	}
