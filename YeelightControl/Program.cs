@@ -9,7 +9,7 @@ namespace YeelightControl {
 		#region variables
 		static readonly string path = @$"{AppContext.BaseDirectory}config.json";
 		static readonly List<string> availCommands = new () {
-			"on", "off", "set"
+			"on", "off", "set", "toggle"
 		};
 		#endregion
 
@@ -32,7 +32,10 @@ namespace YeelightControl {
 				return false;
 			}
 
-			if ((args[0] == availCommands[0] || args[0] == availCommands[1]) && args.Count > 1) {
+			if ((args[0] == availCommands[0] 
+				|| args[0] == availCommands[1] 
+				|| args[0] == availCommands[3])
+				&& args.Count > 1) {
 				Output.InvalidInput(args[1]);
 				Output.Usage();
 				return false;
@@ -84,9 +87,14 @@ namespace YeelightControl {
 				return;
 			}
 
+			// two try-catch in case of one or more bulb failures
 			try {
 				await devicesGroup.Connect();
+			} catch (Exception ex) {
+				Output.Error(ex.Message);
+			}
 
+			try {
 				if (args[0] == availCommands[0]) {
 					await devicesGroup.TurnOn(smooth: 1000);
 				} else if (args[0] == availCommands[1]) {
@@ -98,7 +106,6 @@ namespace YeelightControl {
 			} catch (Exception ex) {
 				Output.Error(ex.Message);
 			}
-
 		}
 
 		static async Task Main(string[] args) {
