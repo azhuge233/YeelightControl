@@ -14,7 +14,7 @@ namespace YeelightControl {
 
 		public static void InvalidInput(string str) {
 			Console.ForegroundColor = ConsoleColor.Red;
-			Console.WriteLine("Invalid input: {0}", str);
+			Console.WriteLine("Invalid arg: {0}", str);
 			Console.ResetColor();
 		}
 
