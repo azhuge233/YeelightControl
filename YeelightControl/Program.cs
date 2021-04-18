@@ -102,6 +102,8 @@ namespace YeelightControl {
 				} else if (args[0] == availCommands[2]) {
 					var bright = Convert.ToInt32(args[1]);
 					await devicesGroup.SetBrightness(value: bright, smooth: 1000);
+				} else if (args[0] == availCommands[3]) {
+					await devicesGroup.Toggle();
 				}
 			} catch (Exception ex) {
 				Output.Error(ex.Message);

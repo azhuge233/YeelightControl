@@ -3,7 +3,13 @@
 namespace YeelightControl {
 	class Output {
 		public static void Usage() {
-			Console.WriteLine("Usage: \n" + "\ton - trun lights on\n" + "\toff - turn off lights\n" + "\tset [0-100] - set brightness");
+			Console.WriteLine("Usage:");
+			Console.WriteLine(
+				"\ton - trun lights on\n" +
+				"\toff - turn off lights\n" +
+				"\tset [0-100] - set brightness\n" +
+				"\ttoggle - toggle bulb on/off"
+			);
 		}
 
 		public static void InvalidInput() {
