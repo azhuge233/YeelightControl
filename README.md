@@ -12,5 +12,5 @@ First add your bulb's IP address in config.json, example:
 
 then execute
 ```
-YeelightControl on/off/toggle/set [0-100]
+YeelightControl on/off/toggle/set [0-100]/RGB [0-100]/temp [xxxx] [0-100]/reset [0-100]
 ```
