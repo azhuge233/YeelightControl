@@ -14,3 +14,4 @@ then execute
 ```
 YeelightControl on/off/toggle/set [0-100]/RGB [0-100]/temp [xxxx] [0-100]/reset [0-100]
 ```
+Tested on Windows 10 and macOS Bug Sur with 4 Yeelight 1S Colorful bulbs.
