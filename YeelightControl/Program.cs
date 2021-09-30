@@ -3,64 +3,14 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Linq;
 using YeelightAPI;
+using YeelightAPI.Models.ColorFlow;
 
 namespace YeelightControl {
 	class Program {
-		#region variables
-		static readonly string path = @$"{AppContext.BaseDirectory}config.json";
-		static readonly List<string> availCommands = new () {
-			"on", "off", "set", "toggle"
-		};
-		#endregion
-
-		static bool CheckValid(List<string> args) {
-			if (args.Count == 0) {
-				Output.InvalidInput("No argument provided");
-				Output.Usage();
-				return false;
-			}
-
-			if (args.Count > 2) {
-				Output.InvalidInput("Too many arguments");
-				Output.Usage();
-				return false;
-			}
-
-			if (!availCommands.Any(x => x == args[0])) {
-				Output.InvalidInput(args[0]);
-				Output.Usage();
-				return false;
-			}
-
-			if ((args[0] == availCommands[0] 
-				|| args[0] == availCommands[1] 
-				|| args[0] == availCommands[3])
-				&& args.Count > 1) {
-				Output.InvalidInput(args[1]);
-				Output.Usage();
-				return false;
-			}
-
-			if (args[0] == availCommands[2]) {
-				if (args.Count < 2) {
-					Output.InvalidInput("lack of argument");
-					Output.Usage();
-					return false;
-				}
-				if (!int.TryParse(args[1], out int tmp)) {
-					Output.InvalidInput(args[1]);
-					Output.Usage();
-					return false;
-				}
-			}
-
-			return true;
-		}
-
 		static List<string> LoadBulbs() {
 			var bulbs = new List<string>();
 			try {
-				bulbs = JsonOperation.LoadData(path: path);
+				bulbs = JsonOperation.LoadData();
 			} catch (Exception ex) {
 				Output.Error(ex.Message);
 			}
@@ -77,33 +27,75 @@ namespace YeelightControl {
 			return devicesGroup;
 		}
 
+		static async Task RGBFlow(DeviceGroup devices, int brightness) {
+			ColorFlow flow = new(0, ColorFlowEndAction.Keep) {
+				new ColorFlowRGBExpression(255, 0, 0, brightness, 2000),
+				new ColorFlowRGBExpression(0, 255, 0, brightness, 2000),
+				new ColorFlowRGBExpression(0, 0, 255, brightness, 2000),
+			};
+
+			await devices.StopColorFlow();
+			await devices.StartColorFlow(flow);
+		}
+
+		static async Task ChangeTempFlow(DeviceGroup devices, int temperature, int brightness) {
+			ColorFlow flow = new(0, ColorFlowEndAction.Keep) {
+				new ColorFlowTemperatureExpression(temperature, brightness, 1000)
+			};
+
+			await devices.StopColorFlow();
+			await devices.StartColorFlow(flow);
+		}
+
+		static async Task ResetFlow(DeviceGroup devices, int brightness) {
+			ColorFlow flow = new(0, ColorFlowEndAction.Keep) {
+				new ColorFlowTemperatureExpression(4500, brightness, 1000)
+			};
+
+			await devices.StopColorFlow();
+			await devices.StartColorFlow(flow);
+		}
+
 		static async Task Run(List<string> args) {
-			if (!CheckValid(args)) return;
+			if (!ArgsValidation.Check(args)) return;
 
-			var devicesGroup = GetDevices();
+			var devices = GetDevices();
 
-			if (devicesGroup.Count == 0) {
+			if (devices.Count == 0) {
 				Output.NoBulb();
 				return;
 			}
 
 			// two try-catch in case of one or more bulb failures
 			try {
-				await devicesGroup.Connect();
+				await devices.Connect();
 			} catch (Exception ex) {
 				Output.Error(ex.Message);
 			}
 
 			try {
-				if (args[0] == availCommands[0]) {
-					await devicesGroup.TurnOn(smooth: 1000);
-				} else if (args[0] == availCommands[1]) {
-					await devicesGroup.TurnOff(smooth: 1000);
-				} else if (args[0] == availCommands[2]) {
-					var bright = Convert.ToInt32(args[1]);
-					await devicesGroup.SetBrightness(value: bright, smooth: 1000);
-				} else if (args[0] == availCommands[3]) {
-					await devicesGroup.Toggle();
+				switch (args[0]) {
+					case (Commands.On):
+						await devices.TurnOn(1000);
+						break;
+					case (Commands.Off):
+						await devices.TurnOff(1000);
+						break;
+					case (Commands.Set):
+						await devices.SetBrightness(Convert.ToInt32(args[1]), 1000);
+						break;
+					case (Commands.Toggle):
+						await devices.Toggle();
+						break;
+					case (Commands.RGB):
+						await RGBFlow(devices, Convert.ToInt32(args[1]));
+						break;
+					case (Commands.Temperature):
+						await ChangeTempFlow(devices, Convert.ToInt32(args[1]), Convert.ToInt32(args[2]));
+						break;
+					case (Commands.Reset):
+						await ResetFlow(devices, Convert.ToInt32(args[1]));
+						break;
 				}
 			} catch (Exception ex) {
 				Output.Error(ex.Message);
@@ -111,8 +103,7 @@ namespace YeelightControl {
 		}
 
 		static async Task Main(string[] args) {
-			var argsl = args.ToList();
-			await Run(argsl);
+			await Run(args.Select(x => x.ToLower()).ToList());
 		}
 	}
 }

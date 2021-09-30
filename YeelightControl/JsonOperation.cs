@@ -5,15 +5,10 @@ using System.IO;
 
 namespace YeelightControl {
 	class JsonOperation : IDisposable {
+		private static readonly string configPath = $"{AppContext.BaseDirectory}config.json";
 
-		public static void WriteData(List<string> data, string path) {
-			string json = JsonConvert.SerializeObject(data, Formatting.Indented);
-			File.WriteAllText(path, string.Empty);
-			File.WriteAllText(path, json);
-		}
-
-		public static List<string> LoadData(string path) {
-			var content = File.ReadAllText(path);
+		public static List<string> LoadData() {
+			var content = File.ReadAllText(configPath);
 			return JsonConvert.DeserializeObject<List<string>>(content);
 		}
 
