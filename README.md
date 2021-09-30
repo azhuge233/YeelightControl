@@ -1,5 +1,5 @@
 # YeelightControl
-Toggle yeelight bulb and adjust brightness
+Toggle yeelight bulb and adjust brightness/RGB/temperature
 
 ## Usage
 First add your bulb's IP address in config.json, example:
