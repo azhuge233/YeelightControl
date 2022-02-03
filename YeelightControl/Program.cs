@@ -99,6 +99,8 @@ namespace YeelightControl {
 				}
 			} catch (Exception ex) {
 				Output.Error(ex.Message);
+			} finally {
+				devices.Disconnect();
 			}
 		}
 
